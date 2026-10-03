@@ -1,0 +1,5 @@
+  35 method=chain_getFinalizedHead
+   2 method=chain_getHeader
+  37 method=chain_getRuntimeVersion
+ 247 method=state_getRuntimeVersion
+   1 method=state_getStorageAt

@@ -4,6 +4,7 @@ cd "$(dirname "$0")"
 source ./xlean.env
 RUN_TAG="${RUN_TAG:-}"; RUN_TAG="${RUN_TAG//-/_}"
 BLOCK_START="${BLOCK_START_OVERRIDE:-$BLOCK_START}"; BLOCK_END="${BLOCK_END_OVERRIDE:-$BLOCK_END}"
+COMPARE_EXCLUDE_BLOCKS="${COMPARE_EXCLUDE_OVERRIDE:-${COMPARE_EXCLUDE_BLOCKS:-}}"
 ADB="${CHAIN_SLUG}${RUN_TAG:-}_explorer_api"
 HDB="${CHAIN_SLUG}${RUN_TAG:-}_harvester"
 TABLES="explorer_block explorer_extrinsic explorer_event explorer_log"

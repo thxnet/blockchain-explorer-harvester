@@ -1,0 +1,10 @@
+== compare explorer_* for #2300000..#2304999 excluding [2300000,2303650]
+explorer_block       SAME base=[4998	6550447305219610776] lean=[4998	6550447305219610776]
+explorer_extrinsic   SAME base=[10100	6811987367437189875] lean=[10100	6811987367437189875]
+explorer_event       SAME base=[10206	3896393494320215083] lean=[10206	3896393494320215083]
+explorer_log         SAME base=[14994	4234844521257746340] lean=[14994	4234844521257746340]
+event_index_account  SAME base=[0	0] lean=[0	0]
+== lml tx-counter SQL
+SAME base=0 lean=0  SELECT COUNT(*) FROM explorer_event WHERE event_module='Nfts' AND event_name='Issued' AND block_number<=2304999
+SAME base=0 lean=0  SELECT COUNT(*) FROM explorer_event WHERE event_module='Balances' AND event_name='Transfer' AND block_number<=2304999
+SAME base=0 lean=0  SELECT COUNT(*) FROM explorer_event WHERE event_name='Transferred' AND block_number<=2304999

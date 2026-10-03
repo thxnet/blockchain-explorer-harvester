@@ -1,0 +1,48 @@
+== lean 2026-10-03T21:55:24Z
++------------------------------------------------+---------+
+| key                                            | value   |
++------------------------------------------------+---------+
+| EVENT_INDEX_ACCOUNTID_MAX_BLOCKNUMBER          | 2310299 |
+| PROCESS_BLOCKS_MAX_BLOCKNUMBER                 | 2310299 |
+| PROCESS_DECODER_MAX_BLOCKNUMBER                | 2310299 |
+| PROCESS_ETL                                    | 2310299 |
+| PROCESS_ETL_DATETIME                           | 2310299 |
+| PROCESS_ETL_EXPLORER_LOGS_MAX_BLOCKNUMBER      | NULL    |
+| PROCESS_ETL_EXPLORER_TRANSFERS_MAX_BLOCKNUMBER | NULL    |
+| PROCESS_STATE_MAX_BLOCKNUMBER                  | 2310299 |
++------------------------------------------------+---------+
++--------------+--------------+-----------------+
+| explorer_min | explorer_max | explorer_blocks |
++--------------+--------------+-----------------+
+|      2310001 |      2310299 |             299 |
++--------------+--------------+-----------------+
++------------------------------------------+-----------------------+----------+---------+--------+
+| db                                       | TABLE_NAME            | rows_est | data_mb | idx_mb |
++------------------------------------------+-----------------------+----------+---------+--------+
+| testnet_leafchain_ecq_fault_harvester    | codec_block_extrinsic |      541 |     6.5 |    0.4 |
+| testnet_leafchain_ecq_fault_explorer_api | explorer_extrinsic    |      586 |     6.5 |    0.3 |
+| testnet_leafchain_ecq_fault_harvester    | node_block_extrinsic  |      458 |     3.3 |    0.2 |
+| testnet_leafchain_ecq_fault_harvester    | codec_block_event     |      615 |     1.5 |    0.4 |
+| testnet_leafchain_ecq_fault_harvester    | runtime_call_argument |      528 |     1.5 |    0.4 |
+| testnet_leafchain_ecq_fault_harvester    | codec_block_storage   |      299 |     1.5 |    0.3 |
++------------------------------------------+-----------------------+----------+---------+--------+
++------------------------------------------+----------+
+| db                                       | total_mb |
++------------------------------------------+----------+
+| testnet_leafchain_ecq_fault_explorer_api |      8.2 |
+| testnet_leafchain_ecq_fault_harvester    |     20.5 |
++------------------------------------------+----------+
+62	/var/lib/mysql/testnet_leafchain_ecq_fault_harvester
+16	/var/lib/mysql/testnet_leafchain_ecq_fault_explorer_api
+219	total
+== integrity
++---------------+----------------+
+| explorer_gaps | missing_blocks |
++---------------+----------------+
+|             1 | 2310000        |
++---------------+----------------+
++----------------+--------+
+| partial_blocks | blocks |
++----------------+--------+
+|              0 | NULL   |
++----------------+--------+
