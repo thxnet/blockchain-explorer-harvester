@@ -362,12 +362,13 @@ class Harvester:
                             self.log("⏸  Job 'etl_process' paused", 1)
 
                 except BlockDecodeException as e:
+                    self.session.rollback()
                     self.log("⛔ An error occurred: '{}' Restarting ...".format(e))
 
                 except (WebSocketConnectionClosedException, ConnectionRefusedError,
                         WebSocketBadStatusException, BrokenPipeError, SubstrateRequestException) as e:
-                    # reestablish connection
-                    self.log("⛔ Connection lost: '{}' Reconnecting ...".format(e))
+                    self.session.rollback()
+                    self.log("⛔ Connection lost: '{}' Uncommitted work rolled back. Reconnecting ...".format(e))
                     try:
                         self.substrate.connect_websocket()
                     except (ConnectionRefusedError, WebSocketBadStatusException, BrokenPipeError,
