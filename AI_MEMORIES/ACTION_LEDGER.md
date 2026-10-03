@@ -21,3 +21,8 @@ Goal: cut explorer MySQL storage cost (11 hcloud volumes, 8,460 GiB provisioned)
 ## Log
 
 - 2026-10-03: forks created; branch `thxnet/lean-storage`; code read (above).
+- 2026-10-03: `PruneIntermediate` job added (off by default, env `PRUNE_INTERMEDIATE_ENABLED/PRUNE_KEEP_BLOCKS/PRUNE_BATCH_BLOCKS`). Commit 03685be.
+- 2026-10-03: stock `docker build` of harvester fails today: unpinned `substrate-interface` deps resolve `py-sr25519-bindings 0.2.4` (sdist, needs Rust). Lean image = `FROM ghcr.io/thxnet/blockchain-explorer-harvester:230825-c6fe5d3` + `COPY app` (`rbv/Dockerfile.lean`), same libs as prod.
+- 2026-10-03: .9 experiment running: `rbv/up.sh base|lean`, `rbv/measure.sh`, `rbv/compare.sh`. Testnet ECQ blocks 2,300,000..2,304,999 over public RPC (~3 s/block, RTT-bound). Docker network `xlean-net` on subnet 10.241.77.0/24 (default pools exhausted on .9). Docker Hub pulls must run on .9 via ssh (Mac keychain locked).
+- 2026-10-03: explorer-ui extrinsic page shows `callArguments` from explorer-api only (no RPC fallback) -> stripping inherent args blanks that page for inherents. Needs Noel decision.
+- 2026-10-03: rootchain explorer layer per block: `ParaInherent.enter` ~9.6 KB + ~5.5 `ParaInclusion.Candidate*` events x ~1.36 KB.
