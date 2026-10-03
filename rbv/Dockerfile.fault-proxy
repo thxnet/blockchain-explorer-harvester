@@ -1,0 +1,4 @@
+FROM python:3.12-slim
+RUN pip install --no-cache-dir websockets==13.1
+COPY fault_proxy.py /fault_proxy.py
+CMD ["python", "/fault_proxy.py"]

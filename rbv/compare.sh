@@ -2,8 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 source ./xlean.env
-ADB="${CHAIN_SLUG}_explorer_api"
-HDB="${CHAIN_SLUG}_harvester"
+RUN_TAG="${RUN_TAG:-}"; RUN_TAG="${RUN_TAG//-/_}"
+BLOCK_START="${BLOCK_START_OVERRIDE:-$BLOCK_START}"; BLOCK_END="${BLOCK_END_OVERRIDE:-$BLOCK_END}"
+ADB="${CHAIN_SLUG}${RUN_TAG:-}_explorer_api"
+HDB="${CHAIN_SLUG}${RUN_TAG:-}_harvester"
 TABLES="explorer_block explorer_extrinsic explorer_event explorer_log"
 q() { docker --context "$DOCKER_CONTEXT" exec "$PREFIX-mysql-$1" mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -N -e "$2" 2>/dev/null; }
 fingerprint() {
@@ -15,12 +17,13 @@ upto=$(q base "SELECT LEAST(COALESCE((SELECT MAX(number) FROM \`$ADB\`.explorer_
 upto_lean=$(q lean "SELECT COALESCE((SELECT MAX(number) FROM \`$ADB\`.explorer_block),0)")
 upto=$(( upto < upto_lean ? upto : upto_lean ))
 [ "$upto" -ge "$BLOCK_START" ] || { echo "no explorer data in window yet (upto=$upto)"; exit 2; }
-echo "== compare explorer_* for #$BLOCK_START..#$upto"
+echo "== compare explorer_* for #$BLOCK_START..#$upto excluding [${COMPARE_EXCLUDE_BLOCKS:-}]"
 fail=0
 for t in $TABLES; do
   col=block_number; [ "$t" = explorer_block ] && col=number
-  b=$(fingerprint base "$ADB" "$t" "$col BETWEEN $BLOCK_START AND $upto")
-  l=$(fingerprint lean "$ADB" "$t" "$col BETWEEN $BLOCK_START AND $upto")
+  w="$col BETWEEN $BLOCK_START AND $upto AND $col NOT IN (${COMPARE_EXCLUDE_BLOCKS:-0})"
+  b=$(fingerprint base "$ADB" "$t" "$w")
+  l=$(fingerprint lean "$ADB" "$t" "$w")
   s=SAME; [ "$b" = "$l" ] || { s=DIFF; fail=1; }
   printf '%-20s %-4s base=[%s] lean=[%s]\n' "$t" "$s" "$b" "$l"
 done

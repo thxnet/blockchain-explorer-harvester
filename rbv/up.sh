@@ -3,12 +3,17 @@ set -euo pipefail
 cd "$(dirname "$0")"
 source ./xlean.env
 VARIANT="${1:?usage: up.sh base|lean}"
+RUN_TAG="${RUN_TAG:-}"
+SUBSTRATE_RPC_URL="${RPC_URL_OVERRIDE:-$SUBSTRATE_RPC_URL}"
+BLOCK_START="${BLOCK_START_OVERRIDE:-$BLOCK_START}"
+BLOCK_END="${BLOCK_END_OVERRIDE:-$BLOCK_END}"
 D() { docker --context "$DOCKER_CONTEXT" "$@"; }
 MYSQL="$PREFIX-mysql-$VARIANT"
-API="$PREFIX-api-$VARIANT"
-HARV="$PREFIX-harvester-$VARIANT"
-HDB="${CHAIN_SLUG}_harvester"
-ADB="${CHAIN_SLUG}_explorer_api"
+API="$PREFIX-api-$VARIANT$RUN_TAG"
+HARV="$PREFIX-harvester-$VARIANT$RUN_TAG"
+SLUG="${CHAIN_SLUG}${RUN_TAG//-/_}"
+HDB="${SLUG}_harvester"
+ADB="${SLUG}_explorer_api"
 
 D network inspect "$NETWORK" >/dev/null 2>&1 || D network create --subnet "$NETWORK_SUBNET" "$NETWORK" >/dev/null
 D inspect "$PREFIX-redis" >/dev/null 2>&1 || D run -d --name "$PREFIX-redis" --network "$NETWORK" "$REDIS_IMAGE" >/dev/null
@@ -53,4 +58,4 @@ if ! D inspect "$HARV" >/dev/null 2>&1; then
     ${EXTRA[@]+"${EXTRA[@]}"} \
     --entrypoint /usr/src/start.sh "$IMAGE" >/dev/null
 fi
-echo "[$VARIANT] harvester started: $HARV ($IMAGE)"
+echo "[$VARIANT$RUN_TAG] harvester started: $HARV ($IMAGE) rpc=$SUBSTRATE_RPC_URL blocks=$BLOCK_START..$BLOCK_END db=$HDB"

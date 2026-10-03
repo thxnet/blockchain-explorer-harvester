@@ -1,0 +1,46 @@
+== base 2026-10-03T21:02:43Z
++------------------------------------------------+---------+
+| key                                            | value   |
++------------------------------------------------+---------+
+| EVENT_INDEX_ACCOUNTID_MAX_BLOCKNUMBER          | 2304999 |
+| PROCESS_BLOCKS_MAX_BLOCKNUMBER                 | 2304999 |
+| PROCESS_DECODER_MAX_BLOCKNUMBER                | 2304999 |
+| PROCESS_ETL                                    | 2304999 |
+| PROCESS_ETL_DATETIME                           | 2304999 |
+| PROCESS_ETL_EXPLORER_LOGS_MAX_BLOCKNUMBER      | NULL    |
+| PROCESS_ETL_EXPLORER_TRANSFERS_MAX_BLOCKNUMBER | NULL    |
+| PROCESS_STATE_MAX_BLOCKNUMBER                  | 2304999 |
++------------------------------------------------+---------+
++--------------+--------------+-----------------+
+| explorer_min | explorer_max | explorer_blocks |
++--------------+--------------+-----------------+
+|      2300001 |      2304999 |            4999 |
++--------------+--------------+-----------------+
++------------------------------------+-------------------------------+----------+---------+--------+
+| db                                 | TABLE_NAME                    | rows_est | data_mb | idx_mb |
++------------------------------------+-------------------------------+----------+---------+--------+
+| testnet_leafchain_ecq_harvester    | codec_block_extrinsic         |     6714 |    96.5 |   10.1 |
+| testnet_leafchain_ecq_explorer_api | explorer_extrinsic            |     9725 |    81.5 |    4.6 |
+| testnet_leafchain_ecq_harvester    | node_block_extrinsic          |     8696 |    41.6 |    2.5 |
+| testnet_leafchain_ecq_harvester    | codec_block_event             |     8825 |    14.6 |   10.1 |
+| testnet_leafchain_ecq_harvester    | codec_block_header_digest_log |    16239 |     8.5 |    7.6 |
+| testnet_leafchain_ecq_harvester    | codec_block_storage           |     4245 |    10.6 |    5.5 |
+| testnet_leafchain_ecq_harvester    | node_block_storage            |     4761 |     1.5 |    7.0 |
+| testnet_leafchain_ecq_harvester    | node_block_header_digest_log  |    16978 |     3.5 |    4.5 |
+| testnet_leafchain_ecq_explorer_api | explorer_event                |    10081 |     3.5 |    2.9 |
+| testnet_leafchain_ecq_explorer_api | explorer_log                  |    14824 |     3.5 |    2.9 |
+| testnet_leafchain_ecq_harvester    | codec_block_timestamp         |     4746 |     1.5 |    2.6 |
+| testnet_leafchain_ecq_explorer_api | explorer_block                |     4902 |     1.5 |    0.8 |
+| testnet_leafchain_ecq_harvester    | runtime_call_argument         |      528 |     1.5 |    0.4 |
+| testnet_leafchain_ecq_harvester    | node_block_header             |     5079 |     1.5 |    0.2 |
+| testnet_leafchain_ecq_harvester    | node_block_runtime            |     4854 |     1.5 |    0.2 |
++------------------------------------+-------------------------------+----------+---------+--------+
++------------------------------------+----------+
+| db                                 | total_mb |
++------------------------------------+----------+
+| testnet_leafchain_ecq_explorer_api |    101.3 |
+| testnet_leafchain_ecq_harvester    |    235.9 |
++------------------------------------+----------+
+329	/var/lib/mysql/testnet_leafchain_ecq_harvester
+135	/var/lib/mysql/testnet_leafchain_ecq_explorer_api
+158	total
