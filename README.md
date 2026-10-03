@@ -42,3 +42,7 @@ Run harvester
 python app/harvester.py --force-start
 ```
 
+
+## THXNET fork
+
+Working branch `thxnet/lean-storage`. Action Ledger: `AI_MEMORIES/ACTION_LEDGER.md`.
