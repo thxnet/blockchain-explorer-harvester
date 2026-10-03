@@ -16,12 +16,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Polkascan. If not, see <http://www.gnu.org/licenses/>.
 import json
+from datetime import datetime
 from hashlib import blake2b
 
 from sqlalchemy.exc import IntegrityError
 
 from scalecodec.base import ScaleType
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from app import settings
 from app.base import Job, GracefulInterruptHandler
@@ -1351,3 +1352,102 @@ class StorageTask(Job):
         codec_block_storage.retry = False
 
         codec_block_storage.save(self.session)
+
+
+class PruneIntermediate(Job):
+
+    icon = '✂️'
+
+    tables = [
+        'node_block_extrinsic',
+        'node_block_storage',
+        'node_block_header_digest_log',
+        'codec_block_extrinsic',
+        'codec_block_storage',
+        'codec_block_event',
+        'codec_block_header_digest_log',
+    ]
+
+    retry_tables = [
+        'codec_block_extrinsic',
+        'codec_block_storage',
+        'codec_block_header_digest_log',
+    ]
+
+    def scalar(self, sql, params=None):
+        return self.session.execute(text(sql), params or {}).scalar()
+
+    def status_value(self, key):
+        record = HarvesterStatus.query(self.session).get(key)
+        return record.value if record else None
+
+    def consumed_max_block(self):
+        bounds = {
+            'PROCESS_ETL': self.status_value('PROCESS_ETL'),
+            'EVENT_INDEX_ACCOUNTID_MAX_BLOCKNUMBER': self.status_value('EVENT_INDEX_ACCOUNTID_MAX_BLOCKNUMBER'),
+        }
+        for etl_db in settings.INSTALLED_ETL_DATABASES:
+            bounds[f'{etl_db}.explorer_block'] = self.scalar(f'SELECT MAX(`number`) FROM `{etl_db}`.`explorer_block`')
+        if any(value is None for value in bounds.values()):
+            self.log(f'Skip prune, consumer progress unknown: {bounds}')
+            return None
+        return min(int(value) for value in bounds.values())
+
+    def first_retry_block(self, block_from, block_to):
+        found = [
+            self.scalar(
+                f'SELECT MIN(block_number) FROM `{table}` WHERE retry = 1 AND block_number BETWEEN :lo AND :hi',
+                {'lo': block_from, 'hi': block_to}
+            )
+            for table in self.retry_tables
+        ]
+        found = [block for block in found if block is not None]
+        return min(found) if found else None
+
+    def start(self):
+        consumed = self.consumed_max_block()
+        if consumed is None:
+            return
+
+        prune_to_limit = consumed - settings.PRUNE_KEEP_BLOCKS
+        done = self.status_value('PROCESS_PRUNE_MAX_BLOCKNUMBER')
+        if done is None:
+            lowest = self.scalar('SELECT MIN(block_number) FROM `node_block_extrinsic`')
+            if lowest is None:
+                return
+            block_from = int(lowest)
+        else:
+            block_from = int(done) + 1
+
+        block_to = min(prune_to_limit, block_from + settings.PRUNE_BATCH_BLOCKS - 1)
+        if block_to < block_from:
+            return
+
+        retry_block = self.first_retry_block(block_from, block_to)
+        if retry_block is not None:
+            self.log(f'⚠️  Retry rows at #{retry_block}, prune stops before it')
+            block_to = retry_block - 1
+            if block_to < block_from:
+                return
+
+        started = datetime.now()
+        deleted = {}
+        for table in self.tables:
+            result = self.session.execute(
+                text(f'DELETE FROM `{table}` WHERE block_number BETWEEN :lo AND :hi'),
+                {'lo': block_from, 'hi': block_to}
+            )
+            deleted[table] = result.rowcount
+            self.harvester.prom_prune_rows.labels(table=table).inc(result.rowcount)
+
+        self.session.merge(HarvesterStatus(
+            key='PROCESS_PRUNE_MAX_BLOCKNUMBER',
+            description='Max blocknumber of pruned intermediate rows',
+            value=block_to
+        ))
+        self.session.commit()
+        self.harvester.prom_prune_max_block.set(block_to)
+
+        elapsed = (datetime.now() - started).total_seconds()
+        self.log(f'Pruned #{block_from}..#{block_to} consumed=#{consumed} keep={settings.PRUNE_KEEP_BLOCKS} '
+                 f'{elapsed:.1f}s rows={json.dumps(deleted)}')

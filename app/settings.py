@@ -70,6 +70,15 @@ if os.environ.get("BLOCK_END") is not None:
 else:
     BLOCK_END = None
 
+PRUNE_INTERMEDIATE_ENABLED = os.environ.get("PRUNE_INTERMEDIATE_ENABLED", "0") == "1"
+
+if PRUNE_INTERMEDIATE_ENABLED:
+    PRUNE_KEEP_BLOCKS = int(os.environ["PRUNE_KEEP_BLOCKS"])
+    PRUNE_BATCH_BLOCKS = int(os.environ["PRUNE_BATCH_BLOCKS"])
+else:
+    PRUNE_KEEP_BLOCKS = None
+    PRUNE_BATCH_BLOCKS = None
+
 try:
     from app.local_settings import *
 except ImportError:

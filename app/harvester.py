@@ -28,7 +28,7 @@ from colored import stylize
 from app.base import DatabaseSubstrateInterface, Job
 from time import sleep
 from websocket import WebSocketConnectionClosedException, WebSocketBadStatusException
-from prometheus_client import start_http_server, Counter, Enum, Histogram
+from prometheus_client import start_http_server, Counter, Enum, Gauge, Histogram
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -94,6 +94,8 @@ class Harvester:
         self.jobs = {}
 
         self.prom_block_process_speed = Histogram('block_process_speed', 'Block process speed')
+        self.prom_prune_rows = Counter('prune_rows_deleted', 'Intermediate rows deleted by prune', ['table'])
+        self.prom_prune_max_block = Gauge('prune_max_blocknumber', 'Max blocknumber pruned')
 
         self.force_start = force_start
 
@@ -107,10 +109,11 @@ class Harvester:
         self.add_job('event_index', jobs.EventIndex)
         self.add_job('etl_process', jobs.EtlProcess)
         self.add_job('storage_tasks', jobs.StorageTask)
+        self.add_job('prune_intermediate', jobs.PruneIntermediate)
 
         self.prom_current_job = Enum('current_job', 'Current Job', states=[
             'cron', 'retrieve_blocks', 'retrieve_runtime_state', 'scale_decode',
-            'event_index', 'etl_process', 'storage_tasks', '-'
+            'event_index', 'etl_process', 'storage_tasks', 'prune_intermediate', '-'
         ])
 
         # Check if status records are present
@@ -353,6 +356,8 @@ class Harvester:
                         if getattr(self.settings, 'ENABLE_HARVESTER', 0) and \
                                 getattr(self.settings, 'ENABLE_HARVESTER_ETL', 0):
                             self.process_job('etl_process')
+                            if self.settings.PRUNE_INTERMEDIATE_ENABLED:
+                                self.process_job('prune_intermediate')
                         else:
                             self.log("⏸  Job 'etl_process' paused", 1)
 
