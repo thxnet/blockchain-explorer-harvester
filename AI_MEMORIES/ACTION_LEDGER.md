@@ -32,3 +32,4 @@ Goal: cut explorer MySQL storage cost (11 hcloud volumes, 8,460 GiB provisioned)
 - 2026-10-04: PROD: hetprod mainnet rootchain explorer has 7 single-block gaps (17395748, 17408797, 17408873, 17410778, 17418733, 17424657, 17425409; 2026-09-30..10-02), same signature (header with 0 extrinsics). Cause: rpc-firewall `rootchain-archive-001-rpc-firewall` returning -32050 'Upstream response unavailable' (95 in one 5 h container life), harvester pod 17 restarts. Other 9 chains: 0 gaps. Not touched; needs Noel.
 - 2026-10-04: Prune-only projection on prod (information_schema): 5,435 GiB -> 1,474 GiB kept (27%).
 - 2026-10-04: .9 harvesters + fault proxy stopped; MySQL/api/redis containers and volumes kept (xlean-*).
+- 2026-10-06: handoff written: `HANDOFF-2026-10-06-works-dc.md` (commit 271c225bf9f9106596cd8933a8387e64db930951)
